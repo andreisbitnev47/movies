@@ -1,0 +1,18 @@
+version: '2'
+services:
+  mongodb:
+    image: mongo
+    volumes:
+      - movies-volume:/data/db
+  movies:
+    build: .
+    command: npm start
+    volumes:
+      - .:/usr/src/project
+      - /usr/src/project/node_modules
+      - /usr/src/project/frontend/dist
+    ports:
+      - 4000:4000
+      - 9229:9229
+volumes:
+  movies-volume:
