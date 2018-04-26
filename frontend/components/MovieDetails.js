@@ -4,6 +4,7 @@ import getMovie from '../queries/getMovie';
 import editMovie from '../queries/editMovie';
 import { graphql, withApollo } from 'react-apollo';
 import Input from './Input';
+import classes from './MovieDetails.css'
 
 class MovieDetails extends Component {
     constructor(props) {
@@ -53,7 +54,7 @@ class MovieDetails extends Component {
                 <Link to={'/'} className="btn btn-info">Go back</Link>
                 <div className="card">
                     <div className="card-body">
-                        <h4 className="card-title">Add a movie</h4>
+                        <h4 className={"card-title " + classes.title}>Edit a movie</h4>
                         <form onSubmit={this.submitHandler.bind(this)}>
                             {Object.entries(this.state).map(([key, val]) => (
                                 <Input 
