@@ -1,15 +1,33 @@
 const graphql = require('graphql');
 const { GraphQLSchema, GraphQLObjectType, GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } = graphql;
 const Movie = require('../models/movie');
+const Actor = require('../models/actor');
+
+const ActorType = new GraphQLObjectType({
+    name: 'Actor',
+    fields: () => ({
+        name: { type: GraphQLID },
+        age: { type: GraphQLString }
+    })
+})
 
 const MovieType = new GraphQLObjectType({
     name: 'Movie',
     fields: () => ({
         id: { type: GraphQLID },
         title: { type: GraphQLString },
-        description: { type: GraphQLString }
+        description: { type: GraphQLString },
+        actors: { 
+            type: new GraphQLList(ActorType),
+            resolve(parentValue) {
+                const actorIds = parentValue.actors.map((actor) => {
+                    return actor.id.toString('hex')
+                })
+                return Actor.find({"_id": {$in: actorIds}});
+            } 
+        }
     })
-})
+});
 
 const RootQueryType = new GraphQLObjectType({
   name: 'RootQuery',
@@ -39,10 +57,23 @@ const mutation = new GraphQLObjectType({
             type: MovieType,
             args: {
                 title: { type: new GraphQLNonNull(GraphQLString) },
-                description: { type: GraphQLString}
+                description: { type: GraphQLString},
+                actorNames: { type: new GraphQLList(GraphQLString)}
             },
-            resolve(parentValue, { title, description }) {
-                return (new Movie({ title, description })).save();
+            resolve(parentValue, { title, description, actorNames }) {
+                Actor.find({"name": {$in: actorNames} }, (err, actors) => {
+                    return (new Movie({ title, description, actors })).save();
+                });
+            }
+        },
+        addActor: {
+            type: ActorType,
+            args: {
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                age: { type: GraphQLString}
+            },
+            resolve(parentValue, { name, age }) {
+                return (new Actor({ name, age })).save();
             }
         },
         editMovie: {

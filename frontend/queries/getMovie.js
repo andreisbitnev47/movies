@@ -5,5 +5,6 @@ fragment myMovie on Movie {
   id
   title
   description
+  actorNames
 }
 `;
