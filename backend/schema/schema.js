@@ -2,6 +2,8 @@ const {
     GraphQLObjectType,
     GraphQLSchema,
     GraphQLString,
+    GraphQLID,
+    GraphQLList
 } = require('graphql');
 
 const {
@@ -17,13 +19,28 @@ const {
 const Movie = require('../models/movie');
 const Actor = require('../models/actor');
 
-function getMovieActors(movies) {
-    return movies.map((movie) => {
+class User {}
+const viewer = new User();
+viewer.id = '1';
+viewer.name = 'me';
+
+function getMovieActors(movie) {
+    return new Promise((resolve, reject) => {
         const actorIds = movie.actors.map((actor) => {
             return actor.id.toString('hex')
         })
-        return Actor.find({"_id": {$in: actorIds}});
-    });
+        let res = [];
+        return Actor.find({"_id": {$in: actorIds}}, (err, actors) => {
+            if (err) {
+                reject(err)
+            }
+            resolve(actors);
+        });
+    })
+}
+
+function mockData() {
+    return [{name: "Brad", age: "55"}]
 }
 
 const {nodeInterface, nodeField} = nodeDefinitions(
@@ -44,11 +61,11 @@ const {nodeInterface, nodeField} = nodeDefinitions(
 const ActorType = new GraphQLObjectType({
     name: 'Actor',
     fields: () => ({
-        id: globalIdField('Actor'),
+        id: globalIdField(),
         name: { type:GraphQLString },
         age: { type:GraphQLString }
     }),
-    interface: [nodeInterface],
+    interfaces: [nodeInterface],
 });
 
 const { connectionType: actorsConnection } = 
@@ -57,27 +74,50 @@ const { connectionType: actorsConnection } =
 const MovieType = new GraphQLObjectType({
     name: 'Movie',
     fields: () => ({
-        id: globalIdField('Movie'),
+        id: globalIdField(),
         title: { type:GraphQLString },
         description: { type:GraphQLString },
         actors: {
             type: actorsConnection,
             args: connectionArgs,
-            resolve: (movies, args) => connectionFromArray(getMovieActors(movies), args),
-        },
+            resolve: async (parentValue, args) => {
+                let actors = await getMovieActors(parentValue);
+                return connectionFromArray(actors, args)
+            }
+        }
     }),
-    interface: [nodeInterface],
+    interfaces: [nodeInterface],
 });
+
+const { connectionType: moviesConnection } = 
+    connectionDefinitions({ name: 'Movies', nodeType: MovieType });
+
+const MainType = new GraphQLObjectType({
+    name: 'Main',
+    fields: () => ({
+        id: globalIdField(),
+        movies: {
+            type: moviesConnection,
+            args: connectionArgs,
+            resolve: async (parentValue, args) => {
+                let movies = await Movie.find({});
+                return connectionFromArray(movies, args)
+            }
+        }
+    }),
+    interfaces: [nodeInterface],
+});
+    
 
 const Query = new GraphQLObjectType({
     name: 'Query',
     fields: () => ({
         node: nodeField,
-        movies: {
-            type: MovieType,
-            resolve: () => Movie.find({}),
+        main: {
+            type: MainType,
+            resolve: () => viewer,
         },
-    }),
+    })
 });
 
 
