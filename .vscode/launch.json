@@ -14,7 +14,7 @@
             "sourceMaps": false,
             "protocol": "inspector",
             "localRoot": "${workspaceFolder}",
-            "remoteRoot": "/home/andrei/personal/movies"
+            "remoteRoot": "/home/andrei/projects/movies"
         }
     ]
 }

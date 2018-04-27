@@ -1,107 +1,86 @@
-const graphql = require('graphql');
-const { GraphQLSchema, GraphQLObjectType, GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } = graphql;
+const {
+    GraphQLObjectType,
+    GraphQLSchema,
+    GraphQLString,
+} = require('graphql');
+
+const {
+    connectionArgs,
+    connectionDefinitions,
+    connectionFromArray,
+    fromGlobalId,
+    globalIdField,
+    nodeDefinitions,
+    toGlobalId,
+} = require('graphql-relay');
+
 const Movie = require('../models/movie');
 const Actor = require('../models/actor');
+
+function getMovieActors(movies) {
+    return movies.map((movie) => {
+        const actorIds = movie.actors.map((actor) => {
+            return actor.id.toString('hex')
+        })
+        return Actor.find({"_id": {$in: actorIds}});
+    });
+}
+
+const {nodeInterface, nodeField} = nodeDefinitions(
+    (globalId) => {
+        const {type, id} = fromGlobalId(globalId);
+        if (type === 'Actor') {
+            return getActor(id);
+        } else if (type === 'Movie') {
+            return getMovie(id);
+        }
+        return null
+    },
+    (obj) => {
+        return obj.actors ? MovieType : ActorType
+    }
+);
 
 const ActorType = new GraphQLObjectType({
     name: 'Actor',
     fields: () => ({
-        name: { type: GraphQLID },
-        age: { type: GraphQLString }
-    })
-})
+        id: globalIdField('Actor'),
+        name: { type:GraphQLString },
+        age: { type:GraphQLString }
+    }),
+    interface: [nodeInterface],
+});
+
+const { connectionType: actorsConnection } = 
+    connectionDefinitions({ name: 'Actor', nodeType: ActorType });
 
 const MovieType = new GraphQLObjectType({
     name: 'Movie',
     fields: () => ({
-        id: { type: GraphQLID },
-        title: { type: GraphQLString },
-        description: { type: GraphQLString },
-        actors: { 
-            type: new GraphQLList(ActorType),
-            resolve(parentValue) {
-                const actorIds = parentValue.actors.map((actor) => {
-                    return actor.id.toString('hex')
-                })
-                return Actor.find({"_id": {$in: actorIds}});
-            } 
-        }
-    })
+        id: globalIdField('Movie'),
+        title: { type:GraphQLString },
+        description: { type:GraphQLString },
+        actors: {
+            type: actorsConnection,
+            args: connectionArgs,
+            resolve: (movies, args) => connectionFromArray(getMovieActors(movies), args),
+        },
+    }),
+    interface: [nodeInterface],
 });
 
-const RootQueryType = new GraphQLObjectType({
-  name: 'RootQuery',
-  fields: () => ({
-    movies: {
-        type: new GraphQLList(MovieType),
-        resolve() {
-            return Movie.find({});
-        }
-    },
-    movie: {
-        type: MovieType,
-        args: {
-            id: { type: new GraphQLNonNull(GraphQLID) }
+const Query = new GraphQLObjectType({
+    name: 'Query',
+    fields: () => ({
+        node: nodeField,
+        movies: {
+            type: MovieType,
+            resolve: () => Movie.find({}),
         },
-        resolve( parentValue, { id }) {
-            return Movie.findById(id);
-        }
-    }
-  })
+    }),
 });
 
-const mutation = new GraphQLObjectType({
-    name: 'Mutation',
-    fields: {
-        addMovie: {
-            type: MovieType,
-            args: {
-                title: { type: new GraphQLNonNull(GraphQLString) },
-                description: { type: GraphQLString},
-                actorNames: { type: new GraphQLList(GraphQLString)}
-            },
-            resolve(parentValue, { title, description, actorNames }) {
-                Actor.find({"name": {$in: actorNames} }, (err, actors) => {
-                    return (new Movie({ title, description, actors })).save();
-                });
-            }
-        },
-        addActor: {
-            type: ActorType,
-            args: {
-                name: { type: new GraphQLNonNull(GraphQLString) },
-                age: { type: GraphQLString}
-            },
-            resolve(parentValue, { name, age }) {
-                return (new Actor({ name, age })).save();
-            }
-        },
-        editMovie: {
-            type: MovieType,
-            args: {
-                id: { type: new GraphQLNonNull(GraphQLID) },
-                title: { type: GraphQLString },
-                description: { type: GraphQLString }
-            },
-            resolve(parentValue, { id, title, description }) {
-                return ( Movie.findByIdAndUpdate(id, { title, description }, {new: true}, obj => obj))
-            }
-        },
-        deleteMovie: {
-            type: MovieType,
-            args: {
-                id: { type: new GraphQLNonNull(GraphQLID) }
-            },
-            resolve(parentValue, { id }) {
-                return (Movie.findByIdAndRemove(id, {new: false}, (obj) => {
-                    return obj;
-                }))
-            }
-        }
-    }
-})
 
 module.exports = new GraphQLSchema({
-    query: RootQueryType,
-    mutation
+    query: Query,
 });
