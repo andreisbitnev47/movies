@@ -17,13 +17,13 @@ app.use('/graphql', expressGraphQL({
   graphiql: true
 }));
 
-if(config.buildMode === 'production') {
-  app.use('/', express.static(path.join(__dirname, '/../frontend/dist')));
-} else if(config.buildMode === 'development') {
-  const webpackMiddleware = require('webpack-dev-middleware');
-  const webpack = require('webpack');
-  const webpackConfig = require('../webpack.config.js');
-  app.use(webpackMiddleware(webpack(webpackConfig)));
-}
+// if(config.buildMode === 'production') {
+//   app.use('/', express.static(path.join(__dirname, '/../frontend/dist')));
+// } else if(config.buildMode === 'development') {
+//   const webpackMiddleware = require('webpack-dev-middleware');
+//   const webpack = require('webpack');
+//   const webpackConfig = require('../webpack.config.js');
+//   app.use(webpackMiddleware(webpack(webpackConfig)));
+// }
 
 module.exports = app;

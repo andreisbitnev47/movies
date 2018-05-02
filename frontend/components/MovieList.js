@@ -1,8 +1,17 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { graphql } from 'react-apollo';
 import getMovies from '../queries/getMovies';
 import deleteMovie from '../queries/deleteMovie';
+import { QueryRenderer, graphql } from 'react-relay';
+import environment from '../Environment';
+
+const getMovies = graphql`
+    query getMovies {
+        main {
+            
+        }
+    }
+`;
 
 class MovieList extends Component {
     onMovieDelete(id) {
