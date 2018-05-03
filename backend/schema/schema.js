@@ -39,8 +39,19 @@ function getMovieActors(movie) {
     })
 }
 
-function mockData() {
-    return [{name: "Brad", age: "55"}]
+function getActorMovies(actor) {
+    return new Promise((resolve, reject) => {
+        const movieIds = actor.movies.map((movie) => {
+            return movie.id.toString('hex')
+        })
+        let res = [];
+        return Movie.find({"_id": {$in: movieIds}}, (err, movies) => {
+            if (err) {
+                reject(err)
+            }
+            resolve(movies);
+        });
+    })
 }
 
 const {nodeInterface, nodeField} = nodeDefinitions(
@@ -58,12 +69,23 @@ const {nodeInterface, nodeField} = nodeDefinitions(
     }
 );
 
+// const { connectionType: movieConnection } = 
+//     connectionDefinitions({ name: 'Movie', nodeType: MovieType });
+
 const ActorType = new GraphQLObjectType({
     name: 'Actor',
     fields: () => ({
         id: globalIdField(),
         name: { type:GraphQLString },
-        age: { type:GraphQLString }
+        age: { type:GraphQLString },
+        movies: {
+            type: connectionDefinitions({ name: 'Movie', nodeType: MovieType }).connectionType,
+            args: connectionArgs,
+            resolve: async (parentValue, args) => {
+                let movies = await getActorMovies(parentValue);
+                return connectionFromArray(movies, args)
+            }
+        }
     }),
     interfaces: [nodeInterface],
 });
