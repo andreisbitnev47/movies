@@ -6,10 +6,23 @@ const Actor = require('../models/actor');
 const ActorType = new GraphQLObjectType({
     name: 'Actor',
     fields: () => ({
+        id: { type: GraphQLID },
         name: { type: GraphQLID },
-        age: { type: GraphQLString }
+        age: { type: GraphQLString },
+        movies: {
+            type: new GraphQLList(MovieType),
+            resolve(parentValue) {
+                if(!parentValue.movies) {
+                    return [];
+                }
+                const movieIds = parentValue.movies.map((movie) => {
+                    return movie.id.toString('hex')
+                })
+                return Movie.find({"_id": {$in: movieIds}});
+            }
+        }
     })
-})
+});
 
 const MovieType = new GraphQLObjectType({
     name: 'Movie',
@@ -46,6 +59,21 @@ const RootQueryType = new GraphQLObjectType({
         resolve( parentValue, { id }) {
             return Movie.findById(id);
         }
+    },
+    actor: {
+        type: ActorType,
+        args: {
+            id: { type: new GraphQLNonNull(GraphQLID) }
+        },
+        resolve( parentValue, { id }) {
+            return Actor.findById(id);
+        }
+    },
+    actors: {
+        type: new GraphQLList(ActorType),
+        resolve( parentValue, { id }) {
+            return Actor.find({});
+        }
     }
   })
 });
@@ -60,13 +88,12 @@ const mutation = new GraphQLObjectType({
                 description: { type: GraphQLString},
                 actorNames: { type: new GraphQLList(GraphQLString)}
             },
-            resolve(parentValue, { title, description, actorNames }) {
-                Actor.find({"name": {$in: actorNames} }, (err, actors) => {
-                    if(!actors) {
-                        return (new Movie({ title, description })).save();
-                    }
-                    return (new Movie({ title, description, actors })).save();
-                });
+            resolve: async(parentValue, { title, description, actorNames }) => {
+                let actors = await Actor.find({"name": {$in: actorNames} });
+                if(!actors || !actors.length) {
+                    return await (new Movie({ title, description })).save();
+                }
+                return await (new Movie({ title, description, actors })).save();
             }
         },
         addActor: {
@@ -76,16 +103,14 @@ const mutation = new GraphQLObjectType({
                 age: { type: GraphQLString},
                 movieNames: { type: new GraphQLList(GraphQLString) }
             },
-            resolve(parentValue, { name, age }) {
-                Movie.find({"name": {$in: movieNames} }, (err, movies) => {
-                    if(!movies) {
-                        return (new Actor({ name, age })).save();
-                    }
-                    const newActor = new Actor({ name, age, movies }).save();
-                    Movie.updateMany({"name": {$in: movieNames} }, { $push: { actors: newActor } }, (err, updated) => {
-                        return newActor;
-                    })
-                });
+            resolve: async (parentValue, { name, age, movieNames }) => {
+                let movies = await Movie.find({"title": {$in: movieNames} });
+                if(!movies || !movies.length) {
+                    return await (new Actor({ name, age })).save();
+                }
+                let newActor = await new Actor({ name, age, movies }).save();
+                await Movie.updateMany({"title": {$in: movieNames} }, { $push: { actors: newActor } });
+                return newActor;
             }
         },
         editMovie: {
