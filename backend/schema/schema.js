@@ -62,6 +62,9 @@ const mutation = new GraphQLObjectType({
             },
             resolve(parentValue, { title, description, actorNames }) {
                 Actor.find({"name": {$in: actorNames} }, (err, actors) => {
+                    if(!actors) {
+                        return (new Movie({ title, description })).save();
+                    }
                     return (new Movie({ title, description, actors })).save();
                 });
             }
@@ -70,10 +73,19 @@ const mutation = new GraphQLObjectType({
             type: ActorType,
             args: {
                 name: { type: new GraphQLNonNull(GraphQLString) },
-                age: { type: GraphQLString}
+                age: { type: GraphQLString},
+                movieNames: { type: new GraphQLList(GraphQLString) }
             },
             resolve(parentValue, { name, age }) {
-                return (new Actor({ name, age })).save();
+                Movie.find({"name": {$in: movieNames} }, (err, movies) => {
+                    if(!movies) {
+                        return (new Actor({ name, age })).save();
+                    }
+                    const newActor = new Actor({ name, age, movies }).save();
+                    Movie.updateMany({"name": {$in: movieNames} }, { $push: { actors: newActor } }, (err, updated) => {
+                        return newActor;
+                    })
+                });
             }
         },
         editMovie: {
