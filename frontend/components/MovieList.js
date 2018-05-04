@@ -1,17 +1,6 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import getMovies from '../queries/getMovies';
-import deleteMovie from '../queries/deleteMovie';
-import { QueryRenderer, graphql } from 'react-relay';
-import environment from '../Environment';
-
-const getMovies = graphql`
-    query getMovies {
-        main {
-            
-        }
-    }
-`;
+import Movie from './Movie';
+import { createFragmentContainer, graphql } from 'react-relay';
 
 class MovieList extends Component {
     onMovieDelete(id) {
@@ -25,38 +14,32 @@ class MovieList extends Component {
           });
     }
     renderMovies() {
-        return this.props.data.movies.map( ({ id, title, description }) => {
+        return this.props.main.movies.edges.map( ({node}, index) => {
             return (
-                <li key={id} className="list-group-item">
-                    <Link to={`/movies/${id}`}>
-                        {title}
-                    </Link>
-                    <span className="btn btn-danger float-right" onClick={() => this.onMovieDelete(id)}>Delete</span>
-                    <div>{description}</div>
-                </li>
+                <Movie movie={node} key={index} />
             )
         });
     }
     render() {
-        if(this.props.data.loading) {
-            return (
-                <div></div>
-            )
-        }
         return (
             <div className="container">
                 <h4>Movies</h4>
                 <ul className="list-group">
                     {this.renderMovies()}
                 </ul>
-                <Link to={`/movies/add`} className="btn btn-success">
-                    Add new movie
-                </Link>
             </div>
         )
     }
 }
 
-export default graphql(deleteMovie)(
-    graphql(getMovies)(MovieList)
-);
+export default createFragmentContainer(MovieList, graphql`
+  fragment MovieList_main on Main {
+    movies{
+      edges {
+        node {
+          ...Movie_movie
+        }
+      }
+    }
+  }
+`);

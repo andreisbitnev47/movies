@@ -1,19 +1,34 @@
 import React, { Component } from 'react';
-import { Route, Switch } from 'react-router-dom';
 import MovieList from './MovieList';
-import MovieDetails from './MovieDetails';
-import AddMovie from './AddMovie';
+import {
+    QueryRenderer,
+    graphql
+  } from 'react-relay';
+import environment from '../Environment';
+
+const AppMainQuery = graphql`
+  query AppMainQuery{
+    main {
+      ...MovieList_main
+    }
+  }
+`
 
 class App extends Component {
     render() {
         return (
-            <div>
-                <Switch>
-                    <Route path="/" exact component={ MovieList } />
-                    <Route path="/movies/add" component={ AddMovie } />
-                    <Route path="/movies/:id" component={ MovieDetails } />
-                </Switch>
-            </div>
+            <QueryRenderer
+                environment={environment}
+                query={AppMainQuery}
+                render={({error, props}) => {
+                if (error) {
+                    return <div>{error.message}</div>
+                } else if (props) {
+                    return <MovieList main={props.main} />
+                }
+                return <div>Loading</div>
+                }}
+            />
         )
     }
 }

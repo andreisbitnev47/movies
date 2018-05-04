@@ -3,6 +3,7 @@ type Actor implements Node {
   id: ID!
   name: String
   age: String
+  movies(after: String, first: Int, before: String, last: Int): MovieConnection
 }
 
 """A connection to a list of items."""
@@ -35,6 +36,24 @@ type Movie implements Node {
   title: String
   description: String
   actors(after: String, first: Int, before: String, last: Int): ActorConnection
+}
+
+"""A connection to a list of items."""
+type MovieConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [MovieEdge]
+}
+
+"""An edge in a connection."""
+type MovieEdge {
+  """The item at the end of the edge"""
+  node: Movie
+
+  """A cursor for use in pagination"""
+  cursor: String!
 }
 
 """A connection to a list of items."""
