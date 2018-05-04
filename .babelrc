@@ -1,6 +1,7 @@
 {
     "presets": ["env", "react"],
     "plugins": [
-        "relay"
+        "relay",
+        "transform-object-rest-spread"
     ]
 }

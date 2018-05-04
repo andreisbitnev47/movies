@@ -1,10 +1,11 @@
 import React from 'react';
 import { createFragmentContainer, graphql } from 'react-relay';
 
-const Movie = (props) => {
+const Movie = ({movie}) => {
     return (
         <li className="list-group-item">
-            <div>{props.movie.title}</div>
+            {movie.title}
+            <div>{movie.description}</div>
         </li>
     );
 }
