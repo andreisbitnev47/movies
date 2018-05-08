@@ -1,11 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App';
-import { BrowserRouter } from 'react-router-dom';
+import MovieDetails from './components/MovieDetail';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 const app = (
   <BrowserRouter>
-      <App />
+      <Switch>
+        <Route exact path='/' component={App}/>
+        <Route path='/movies/:id' component={MovieDetails} />
+      </Switch>
   </BrowserRouter>
 );
 

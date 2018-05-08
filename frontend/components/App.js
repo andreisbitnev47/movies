@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import MovieList from './MovieList';
 import PropsRoute from './PropsRoute';
+
 import {
     QueryRenderer,
     graphql
@@ -26,7 +27,7 @@ class App extends Component {
                     return <div>{error.message}</div>
                 } else if (props) {
                     return (
-                        <PropsRoute path='/' component={MovieList} main={props.main} />
+                        <MovieList main={props.main} />
                     )
                     
                 }

@@ -54,6 +54,14 @@ function getActorMovies(actor) {
     })
 }
 
+function getMovie(id) {
+    return Movie.findById(id);
+}
+
+function getActor(id) {
+    return Actor.findById(id);
+}
+
 const {nodeInterface, nodeField} = nodeDefinitions(
     (globalId) => {
         const {type, id} = fromGlobalId(globalId);

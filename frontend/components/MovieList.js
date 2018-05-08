@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 import Movie from './Movie';
 import { createFragmentContainer, graphql } from 'react-relay';
-import PropsRoute from './PropsRoute';
-import MovieDetails from './MovieDetails';
-import { Link } from 'react-router-dom';
 
 class MovieList extends Component {
     onMovieDelete(id) {
@@ -20,10 +17,7 @@ class MovieList extends Component {
         return this.props.main.movies.edges.map( ({node}, index) => {
             return (
                 <div key={node.__id}>
-                    <Link to={this.props.match.url + node.__id}>
-                        <Movie movie={node} />
-                    </Link>
-                    <PropsRoute path={this.props.match.url + node.__id} component={ Movie } movie={node} />
+                    <Movie movie={node} />
                 </div>
             )
         });
