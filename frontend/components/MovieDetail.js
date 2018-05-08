@@ -8,19 +8,20 @@ import {
     QueryRenderer,
     graphql
   } from 'react-relay';
+import editMovieMutation from '../queries/EditMovie';
 import QueryRendererProps from './QueryRendererProps';
 import environment from '../Environment';
 
 const MovieDetailsQuery = graphql`
-  query MovieDetailsQuery($id: ID!){
-    node(id: $id){
-        id
-        ... on Movie{
-            title,
-            description
+    query MovieDetailsQuery($id: ID!){
+        node(id: $id){
+            id
+            ... on Movie{
+                title,
+                description
+            }
         }
     }
-  }
 `
 
 class MovieDetailRender extends Component {
@@ -43,15 +44,36 @@ class MovieDetailRender extends Component {
                     placeholder: 'Movie description'
                 },
                 value: "description"
+            },
+            id: {
+                elementType: 'text',
+                elementConfig: {
+                    hidden: 'text',
+                },
+                value: "id"
             }
         };
     }
     componentWillReceiveProps(nextProps) {
         console.log(nextProps);
+
         this.setState({
             title: {...this.state.title, value: nextProps.res.node.title},
-            description: {...this.state.title, value: nextProps.res.node.description}
+            description: {...this.state.title, value: nextProps.res.node.description},
+            id: {...this.state.id, value: nextProps.res.node.id}
         });
+    }
+    updateState(key, value) {
+        this.setState({ 
+            [key]: Object.assign(this.state[key], { value })
+        })
+    }
+    handleSubmit = (event) => {
+        event.preventDefault();
+        const id = this.state.id.value;
+        const title = this.state.title.value;
+        const description = this.state.description.value;
+        editMovieMutation(id, title, description, () => this.props.redirect('/'));
     }
     render() {
         if(this.props.res && this.props.res.node) {
@@ -61,7 +83,7 @@ class MovieDetailRender extends Component {
                     <div className="card">
                         <div className="card-body">
                             <h4 className={"card-title " + classes.title}>Edit a movie</h4>
-                            <form>
+                            <form onSubmit={this.handleSubmit.bind(this)}>
                                 {Object.entries(this.state).map(([key, val]) => (
                                     <Input 
                                         key={key}
@@ -84,6 +106,9 @@ class MovieDetailRender extends Component {
 }
 
 const MovieDetails = (properties) => {
+    const handleRedirect = (url) => {
+        properties.history.push(url);
+    };
     return (
         <QueryRenderer
             environment={environment}
@@ -93,7 +118,7 @@ const MovieDetails = (properties) => {
                 if (error) {
                     return <div>{error.message}</div>
                 }
-                return <MovieDetailRender res={props}/>
+                return <MovieDetailRender res={props} redirect={handleRedirect}/>
             }}
         />
     )

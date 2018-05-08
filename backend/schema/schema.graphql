@@ -24,6 +24,29 @@ type ActorEdge {
   cursor: String!
 }
 
+input AddMovieInput {
+  title: String!
+  description: String
+  clientMutationId: String
+}
+
+type AddMoviePayload {
+  movie: Movie
+  clientMutationId: String
+}
+
+input EditMovieInput {
+  globalId: String!
+  title: String
+  description: String
+  clientMutationId: String
+}
+
+type EditMoviePayload {
+  movie: Movie
+  clientMutationId: String
+}
+
 type Main implements Node {
   """The ID of an object"""
   id: ID!
@@ -72,6 +95,11 @@ type MoviesEdge {
 
   """A cursor for use in pagination"""
   cursor: String!
+}
+
+type Mutation {
+  addMovie(input: AddMovieInput!): AddMoviePayload
+  editMovie(input: EditMovieInput!): EditMoviePayload
 }
 
 """An object with an ID"""

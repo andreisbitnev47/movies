@@ -3,7 +3,8 @@ const {
     GraphQLSchema,
     GraphQLString,
     GraphQLID,
-    GraphQLList
+    GraphQLList,
+    GraphQLNonNull
 } = require('graphql');
 
 const {
@@ -14,6 +15,7 @@ const {
     globalIdField,
     nodeDefinitions,
     toGlobalId,
+    mutationWithClientMutationId
 } = require('graphql-relay');
 
 const Movie = require('../models/movie');
@@ -137,7 +139,54 @@ const MainType = new GraphQLObjectType({
     }),
     interfaces: [nodeInterface],
 });
-    
+
+const addMovieMutation = mutationWithClientMutationId({
+    name: 'AddMovie',
+    inputFields: {
+      title: {
+        type: new GraphQLNonNull(GraphQLString)
+      },
+      description: {
+        type: GraphQLString
+      }
+    },
+    outputFields: {
+      movie: {
+        type: MovieType,
+        resolve: payload => payload
+      }
+    },
+    mutateAndGetPayload: async ({ title, description }) => {
+      const newMovie = await new Movie({ title, description }).save();
+      return newMovie;
+    }
+});
+
+const editMovieMutation = mutationWithClientMutationId({
+    name: 'EditMovie',
+    inputFields: {
+        globalId: {
+            type: new GraphQLNonNull(GraphQLString)
+        },
+        title: {
+            type: GraphQLString
+        },
+        description: {
+            type: GraphQLString
+        }
+    },
+    outputFields: {
+      movie: {
+        type: MovieType,
+        resolve: payload => payload
+      }
+    },
+    mutateAndGetPayload: async ({ globalId, title, description }) => {
+        const { id } = fromGlobalId(globalId);
+        const updatedMovie = await Movie.findByIdAndUpdate(id, { title, description }, {new: true}).exec();
+        return updatedMovie;
+    }
+});
 
 const Query = new GraphQLObjectType({
     name: 'Query',
@@ -150,7 +199,15 @@ const Query = new GraphQLObjectType({
     })
 });
 
+const Mutation = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: () => ({
+        addMovie: addMovieMutation,
+        editMovie: editMovieMutation
+    })
+})
 
 module.exports = new GraphQLSchema({
     query: Query,
+    mutation: Mutation
 });

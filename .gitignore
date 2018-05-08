@@ -1,3 +1,4 @@
 node_modules/
 frontend/dist/
 frontend/components/__generated__/
+frontend/queries/__generated__/
