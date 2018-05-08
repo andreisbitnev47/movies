@@ -27,9 +27,8 @@ class App extends Component {
                     return <div>{error.message}</div>
                 } else if (props) {
                     return (
-                        <MovieList main={props.main} />
+                        <PropsRoute path='/' component={MovieList} main={props.main} />
                     )
-                    
                 }
                 return <div>Loading</div>
                 }}

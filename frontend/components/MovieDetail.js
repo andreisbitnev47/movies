@@ -1,32 +1,15 @@
 import React, { Component } from 'react';
-import PropsRoute from './PropsRoute';
 import Link from 'react-router-dom';
 import classes from './MovieDetails.css';
 import Input from './Input';
-import Form from './Form';
-import {
-    QueryRenderer,
-    graphql
-  } from 'react-relay';
 import editMovieMutation from '../queries/EditMovie';
-import QueryRendererProps from './QueryRendererProps';
 import environment from '../Environment';
+import { createFragmentContainer, graphql } from 'react-relay';
 
-const MovieDetailsQuery = graphql`
-    query MovieDetailsQuery($id: ID!){
-        node(id: $id){
-            id
-            ... on Movie{
-                title,
-                description
-            }
-        }
-    }
-`
-
-class MovieDetailRender extends Component {
+class MovieDetails extends Component {
     constructor(props) {
         super(props);
+        const movie = props.movie;
         this.state = {
             title: {
                 elementType: 'input',
@@ -35,7 +18,7 @@ class MovieDetailRender extends Component {
                     placeholder: 'Movie title',
                     required: true
                 },
-                value: "title"
+                value: movie.title
             },
             description: {
                 elementType: 'textarea',
@@ -43,25 +26,16 @@ class MovieDetailRender extends Component {
                     type: 'text',
                     placeholder: 'Movie description'
                 },
-                value: "description"
+                value: movie.description
             },
             id: {
                 elementType: 'text',
                 elementConfig: {
                     hidden: 'text',
                 },
-                value: "id"
+                value: movie.id
             }
         };
-    }
-    componentWillReceiveProps(nextProps) {
-        console.log(nextProps);
-
-        this.setState({
-            title: {...this.state.title, value: nextProps.res.node.title},
-            description: {...this.state.title, value: nextProps.res.node.description},
-            id: {...this.state.id, value: nextProps.res.node.id}
-        });
     }
     updateState(key, value) {
         this.setState({ 
@@ -76,36 +50,32 @@ class MovieDetailRender extends Component {
         editMovieMutation(id, title, description, () => this.props.redirect('/'));
     }
     render() {
-        if(this.props.res && this.props.res.node) {
-            return (
-                <div className="container">
-                    {/* <Link to={'/'} className="btn btn-info">Go back</Link> */}
-                    <div className="card">
-                        <div className="card-body">
-                            <h4 className={"card-title " + classes.title}>Edit a movie</h4>
-                            <form onSubmit={this.handleSubmit.bind(this)}>
-                                {Object.entries(this.state).map(([key, val]) => (
-                                    <Input 
-                                        key={key}
-                                        elementType={val.elementType}
-                                        elementConfig={val.elementConfig}
-                                        value={this.state[key]['value']}
-                                        changed={event => this.updateState(key, event.target.value)}
-                                    />
-                                ))}
-                                <button type="submit" className="btn btn-success">Submit</button>
-                            </form>
-                        </div>
+        return (
+            <div className="container">
+                {/* <Link to={'/'} className="btn btn-info">Go back</Link> */}
+                <div className="card">
+                    <div className="card-body">
+                        <h4 className={"card-title " + classes.title}>Edit a movie</h4>
+                        <form onSubmit={this.handleSubmit.bind(this)}>
+                            {Object.entries(this.state).map(([key, val]) => (
+                                <Input 
+                                    key={key}
+                                    elementType={val.elementType}
+                                    elementConfig={val.elementConfig}
+                                    value={this.state[key]['value']}
+                                    changed={event => this.updateState(key, event.target.value)}
+                                />
+                            ))}
+                            <button type="submit" className="btn btn-success">Submit</button>
+                        </form>
                     </div>
                 </div>
-            )
-        }
-        return (<div>Loading...</div>)
-        
+            </div>
+        ) 
     }
 }
 
-const MovieDetails = (properties) => {
+const MovieDetailsasd = (properties) => {
     const handleRedirect = (url) => {
         properties.history.push(url);
     };
@@ -118,9 +88,15 @@ const MovieDetails = (properties) => {
                 if (error) {
                     return <div>{error.message}</div>
                 }
-                return <MovieDetailRender res={props} redirect={handleRedirect}/>
+                return <MovieDetail res={props} redirect={handleRedirect}/>
             }}
         />
     )
 }
-export default MovieDetails;
+export default createFragmentContainer(MovieDetails, graphql`
+    fragment MovieDetails_movie on Movie {
+        id
+        title
+        description
+    }
+`)

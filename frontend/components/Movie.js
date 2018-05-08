@@ -1,12 +1,10 @@
 import React from 'react';
 import { createFragmentContainer, graphql } from 'react-relay';
-import { Link } from 'react-router-dom';
 
 const Movie = ({movie}) => {
     return (
         <li className="list-group-item">
-            <Link to={'/movies/' + movie.id} {...{movie}} >{movie.title}</Link>
-            <div>{movie.description}</div>
+            <div>movie.title: {movie.description}</div>
         </li>
     );
 }

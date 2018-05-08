@@ -6,10 +6,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 const app = (
   <BrowserRouter>
-      <Switch>
-        <Route exact path='/' component={App}/>
-        <Route path='/movies/:id' component={MovieDetails} />
-      </Switch>
+      <App />
   </BrowserRouter>
 );
 
