@@ -20,7 +20,7 @@ class MovieList extends Component {
         return this.props.main.movies.edges.map( ({node}, index) => {
             return (
                 <div key={node.__id}>
-                    <Link to={this.props.match.url + node.__id}>
+                    <Link to={{ pathname: this.props.match.url + node.__id, state: { movie: node} }} >
                         <Movie movie={node} />
                     </Link>
                     <PropsRoute path={this.props.match.url + node.__id} component={ MovieDetails } movie={node} />
@@ -29,6 +29,13 @@ class MovieList extends Component {
         });
     }
     render() {
+        const pathname = this.props.location.pathname.split('/')
+        if(this.props.location.state && this.props.location.state.movie) {
+            const movie = this.props.location.state.movie;
+            return (
+                <PropsRoute path={this.props.match.url + movie.id} component={ MovieDetails } movie={movie} />
+            );
+        }
         return (
             <div className="container">
                 <h4>Movies</h4>
