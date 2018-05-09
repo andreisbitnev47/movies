@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import Link from 'react-router-dom';
 import classes from './MovieDetails.css';
 import Input from './Input';
 import editMovieMutation from '../queries/EditMovie';
 import environment from '../Environment';
 import { createFragmentContainer, graphql } from 'react-relay';
+import { Link } from 'react-router-dom';
 
 class MovieDetails extends Component {
     constructor(props) {
@@ -47,12 +47,12 @@ class MovieDetails extends Component {
         const id = this.state.id.value;
         const title = this.state.title.value;
         const description = this.state.description.value;
-        editMovieMutation(id, title, description, () => this.props.redirect('/'));
+        editMovieMutation(id, title, description, () => this.props.history.push('/'));
     }
     render() {
         return (
             <div className="container">
-                {/* <Link to={'/'} className="btn btn-info">Go back</Link> */}
+                <Link to={'/'} className="btn btn-info">Go back</Link>
                 <div className="card">
                     <div className="card-body">
                         <h4 className={"card-title " + classes.title}>Edit a movie</h4>

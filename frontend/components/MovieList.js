@@ -23,7 +23,6 @@ class MovieList extends Component {
                     <Link to={{ pathname: this.props.match.url + node.__id, state: { movie: node} }} >
                         <Movie movie={node} />
                     </Link>
-                    <PropsRoute path={this.props.match.url + node.__id} component={ MovieDetails } movie={node} />
                 </div>
             )
         });
@@ -33,7 +32,7 @@ class MovieList extends Component {
         if(this.props.location.state && this.props.location.state.movie) {
             const movie = this.props.location.state.movie;
             return (
-                <PropsRoute path={this.props.match.url + movie.id} component={ MovieDetails } movie={movie} />
+                <PropsRoute path={this.props.match.url + movie.__id} component={ MovieDetails } movie={movie} />
             );
         }
         return (
