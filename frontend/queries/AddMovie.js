@@ -38,7 +38,8 @@ export default (mainId, title, description, callback) => {
           const mainProxy = proxyStore.get(mainId);
           const connection = ConnectionHandler.getConnection(mainProxy, 'MovieList_movies');
           if(connection) {
-            ConnectionHandler.insertEdgeAfter(connection, newMovie);
+            const edge = ConnectionHandler.createEdge(proxyStore, connection, newMovie);
+            ConnectionHandler.insertEdgeAfter(connection, edge);
           }
         },
         updater: (proxyStore) => {
@@ -50,7 +51,8 @@ export default (mainId, title, description, callback) => {
           const mainProxy = proxyStore.get(mainId);
           const connection = ConnectionHandler.getConnection(mainProxy, 'MovieList_movies');
           if(connection) {
-            ConnectionHandler.insertEdgeAfter(connection, newMovie);
+            const edge = ConnectionHandler.createEdge(proxyStore, connection, newMovie);
+            ConnectionHandler.insertEdgeAfter(connection, edge);
           }
         },
       // 7
