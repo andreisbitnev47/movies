@@ -8,7 +8,14 @@ const renderMergedProps = (component, ...rest) => {
     );
   }
   
-const PropsRoute = ({ component, ...rest }) => {
+const PropsRoute = (props) => {
+    const { component } = props;
+    const rest = {};
+    Object.entries(props).forEach(([key, value]) => {
+        if(key !== 'component') {
+            rest[key] = value;
+        }
+    });
     return (
         <Route {...rest} render={routeProps => {
         return renderMergedProps(component, routeProps, rest);

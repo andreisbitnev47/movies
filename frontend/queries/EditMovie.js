@@ -8,6 +8,7 @@ const mutation = graphql`
   mutation EditMovieMutation($input: EditMovieInput!) {
     editMovie(input: $input) {
       movie{
+        id
         title
         description
       }
@@ -35,15 +36,15 @@ export default (globalId, title, description, callback) => {
         },
         updater: (proxyStore) => {
           // 1 - retrieve the `newMovie` from the server response
-          const createMovieField = proxyStore.getRootField('editMovie')
-          const newMovie = createMovieField.getLinkedRecord('movie')
+          const editMovieField = proxyStore.getRootField('editMovie')
+          const updatedMovie = editMovieField.getLinkedRecord('movie')
           
           // 2 - edit movie in the store
           const movieProxy = proxyStore.get(globalId);
-          const newTitle = newMovie.getValue('title');
-          const newDescription = newMovie.getValue('description');
-          movieProxy.setValue(newTitle, "title");
-          movieProxy.setValue(newDescription, "description");
+          const updatedTitle = updatedMovie.getValue('title');
+          const updatedDescription = updatedMovie.getValue('description');
+          movieProxy.setValue(updatedTitle, "title");
+          movieProxy.setValue(updatedDescription, "description");
         },
       // 7
       onCompleted: () => {

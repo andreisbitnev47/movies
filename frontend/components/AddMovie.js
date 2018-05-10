@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import { graphql } from 'react-apollo';
-import mutation from '../queries/addMovie';
-import getMovies from '../queries/getMovies';
-import { Link } from 'react-router-dom';
+import classes from './MovieDetails.css';
 import Input from './Input';
+import addMovieMutation from '../queries/AddMovie';
+import environment from '../Environment';
+import { Link } from 'react-router-dom';
 
-class AddMovie extends Component {
+class MovieDetails extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -25,22 +25,27 @@ class AddMovie extends Component {
                     placeholder: 'Movie description'
                 },
                 value: ''
-            }
-        }
-    }
-    submitHandler(event) {
-        event.preventDefault();
-        this.props.mutate({
-          variables: { 
-              title: this.state.title.value,
-              description: this.state.description.value
             },
-            update: (store, { data: { addMovie } }) => {
-                let data = store.readQuery({ query: getMovies });
-                data.movies.push(addMovie);
-                store.writeQuery({ query: getMovies, data });
+            id: {
+                elementType: 'text',
+                elementConfig: {
+                    hidden: 'text',
+                },
+                value: props.id
             }
-        }).then(() => this.props.history.push('/'));
+        };
+    }
+    updateState(key, value) {
+        this.setState({ 
+            [key]: Object.assign(this.state[key], { value })
+        })
+    }
+    handleSubmit = (event) => {
+        event.preventDefault();
+        const id = this.state.id.value;
+        const title = this.state.title.value;
+        const description = this.state.description.value;
+        addMovieMutation(id, title, description, () => this.props.history.push('/'));
     }
     render() {
         return (
@@ -48,17 +53,15 @@ class AddMovie extends Component {
                 <Link to={'/'} className="btn btn-info">Go back</Link>
                 <div className="card">
                     <div className="card-body">
-                        <h4 className="card-title">Add a movie</h4>
-                        <form onSubmit={this.submitHandler.bind(this)}>
+                        <h4 className={"card-title " + classes.title}>Add a movie</h4>
+                        <form onSubmit={this.handleSubmit.bind(this)}>
                             {Object.entries(this.state).map(([key, val]) => (
                                 <Input 
                                     key={key}
                                     elementType={val.elementType}
                                     elementConfig={val.elementConfig}
-                                    value={val.value}
-                                    changed={event => this.setState({ 
-                                        [key]: Object.assign(this.state[key], {value: event.target.value })
-                                    })}
+                                    value={this.state[key]['value']}
+                                    changed={event => this.updateState(key, event.target.value)}
                                 />
                             ))}
                             <button type="submit" className="btn btn-success">Submit</button>
@@ -66,8 +69,7 @@ class AddMovie extends Component {
                     </div>
                 </div>
             </div>
-        )
+        ) 
     }
 }
-
-export default graphql(mutation)(AddMovie);
+export default MovieDetails;

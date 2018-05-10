@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import MovieList from './MovieList';
 import PropsRoute from './PropsRoute';
+import { Switch } from 'react-router-dom';
+import AddMovie from './AddMovie';
+import MovieDetails from './MovieDetails';
 
 import {
     QueryRenderer,
@@ -11,6 +14,7 @@ import environment from '../Environment';
 const AppMainQuery = graphql`
   query AppMainQuery{
     main {
+        id
       ...MovieList_main
     }
   }
@@ -27,7 +31,11 @@ class App extends Component {
                     return <div>{error.message}</div>
                 } else if (props) {
                     return (
-                        <PropsRoute path='/' component={MovieList} main={props.main} />
+                        <Switch>
+                            <PropsRoute exact path='/' component={MovieList} main={props.main} />
+                            <PropsRoute path='/addmovie' component={AddMovie} id={props.main.id} />
+                            <PropsRoute path='/:id' component={MovieDetails} />
+                        </Switch> 
                     )
                 }
                 return <div>Loading</div>

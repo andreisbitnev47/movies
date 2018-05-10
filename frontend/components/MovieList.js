@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Movie from './Movie';
 import { createFragmentContainer, graphql } from 'react-relay';
-import MovieDetails from './MovieDetail';
 import { Link } from 'react-router-dom';
 import PropsRoute from './PropsRoute';
 
@@ -20,27 +19,19 @@ class MovieList extends Component {
         return this.props.main.movies.edges.map( ({node}, index) => {
             return (
                 <div key={node.__id}>
-                    <Link to={{ pathname: this.props.match.url + node.__id, state: { movie: node} }} >
-                        <Movie movie={node} />
-                    </Link>
+                    <Movie movie={node} main={this.props.main}/>
                 </div>
             )
         });
     }
     render() {
-        const pathname = this.props.location.pathname.split('/')
-        if(this.props.location.state && this.props.location.state.movie) {
-            const movie = this.props.location.state.movie;
-            return (
-                <PropsRoute path={this.props.match.url + movie.__id} component={ MovieDetails } movie={movie} />
-            );
-        }
         return (
             <div className="container">
                 <h4>Movies</h4>
                 <ul className="list-group">
                     {this.renderMovies()}
                 </ul>
+                <Link to='/addmovie' >add New</Link>
             </div>
         )
     }
@@ -48,11 +39,11 @@ class MovieList extends Component {
 
 export default createFragmentContainer(MovieList, graphql`
   fragment MovieList_main on Main {
-    movies{
+    ...Movie_main
+    movies(last: 100) @connection(key: "MovieList_movies", filters: []){
       edges {
         node {
           ...Movie_movie
-          ...MovieDetails_movie
         }
       }
     }

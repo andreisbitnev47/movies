@@ -35,6 +35,16 @@ type AddMoviePayload {
   clientMutationId: String
 }
 
+input DeleteMovieInput {
+  globalId: String!
+  clientMutationId: String
+}
+
+type DeleteMoviePayload {
+  movie: Movie
+  clientMutationId: String
+}
+
 input EditMovieInput {
   globalId: String!
   title: String
@@ -100,6 +110,7 @@ type MoviesEdge {
 type Mutation {
   addMovie(input: AddMovieInput!): AddMoviePayload
   editMovie(input: EditMovieInput!): EditMoviePayload
+  deleteMovie(input: DeleteMovieInput!): DeleteMoviePayload
 }
 
 """An object with an ID"""

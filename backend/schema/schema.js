@@ -188,6 +188,26 @@ const editMovieMutation = mutationWithClientMutationId({
     }
 });
 
+const deleteMovieMutation = mutationWithClientMutationId({
+    name: 'DeleteMovie',
+    inputFields: {
+        globalId: {
+            type: new GraphQLNonNull(GraphQLString)
+        }
+    },
+    outputFields: {
+      movie: {
+        type: MovieType,
+        resolve: payload => payload
+      }
+    },
+    mutateAndGetPayload: async ({ globalId }) => {
+        const { id } = fromGlobalId(globalId);
+        const deleteMovie = await Movie.findByIdAndRemove(id).exec();
+        return deleteMovie;
+    }
+});
+
 const Query = new GraphQLObjectType({
     name: 'Query',
     fields: () => ({
@@ -203,7 +223,8 @@ const Mutation = new GraphQLObjectType({
     name: 'Mutation',
     fields: () => ({
         addMovie: addMovieMutation,
-        editMovie: editMovieMutation
+        editMovie: editMovieMutation,
+        deleteMovie: deleteMovieMutation
     })
 })
 
