@@ -14,7 +14,6 @@ import environment from '../Environment';
 const AppMainQuery = graphql`
   query AppMainQuery{
     main {
-        id
       ...MovieList_main
     }
   }
@@ -33,7 +32,7 @@ class App extends Component {
                     return (
                         <Switch>
                             <PropsRoute exact path='/' component={MovieList} main={props.main} />
-                            <PropsRoute path='/addmovie' component={AddMovie} id={props.main.id} />
+                            <PropsRoute path='/addmovie' component={AddMovie} />
                             <PropsRoute path='/:id' component={MovieDetails} />
                         </Switch> 
                     )

@@ -15,7 +15,7 @@ const mutation = graphql`
   }
 }
 `
-export default (mainId, id) => {
+export default (id) => {
   const variables = {
     input: {
       globalId: id
@@ -28,7 +28,7 @@ export default (mainId, id) => {
       variables,
       optimisticUpdater: (proxyStore) => {
           // 2 - add new movie to the store
-          const mainProxy = proxyStore.get(mainId);
+          const mainProxy = proxyStore.getRoot().getLinkedRecord('main')
           const connection = ConnectionHandler.getConnection(mainProxy, 'MovieList_movies');
           if(connection) {
             ConnectionHandler.deleteNode(connection, id);
@@ -41,7 +41,7 @@ export default (mainId, id) => {
           const deletedId  = deleteMovie.getValue('id');
           
           // 2 - add new movie to the store
-          const mainProxy = proxyStore.get(mainId);
+          const mainProxy = proxyStore.getRoot().getLinkedRecord('main')
           const connection = ConnectionHandler.getConnection(mainProxy, 'MovieList_movies');
           if(connection) {
             ConnectionHandler.deleteNode(connection, deletedId);

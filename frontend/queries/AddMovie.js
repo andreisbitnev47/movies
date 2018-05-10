@@ -15,7 +15,7 @@ const mutation = graphql`
     }
   }
 `
-export default (mainId, title, description, callback) => {
+export default (title, description, callback) => {
   const variables = {
     input: {
       title,
@@ -35,7 +35,7 @@ export default (mainId, title, description, callback) => {
           newMovie.setValue(title, 'title');
           newMovie.setValue(description, 'description');
           // 2 - add new movie to the store
-          const mainProxy = proxyStore.get(mainId);
+          const mainProxy = proxyStore.getRoot().getLinkedRecord('main');
           const connection = ConnectionHandler.getConnection(mainProxy, 'MovieList_movies');
           if(connection) {
             const edge = ConnectionHandler.createEdge(proxyStore, connection, newMovie);
@@ -44,11 +44,11 @@ export default (mainId, title, description, callback) => {
         },
         updater: (proxyStore) => {
           // 1 - retrieve the `newMovie` from the server response
-          const addMovieField = proxyStore.getRootField('addMovie')
-          const newMovie = addMovieField.getLinkedRecord('movie')
+          const addMovieField = proxyStore.getRootField('addMovie');
+          const newMovie = addMovieField.getLinkedRecord('movie');
           
           // 2 - add new movie to the store
-          const mainProxy = proxyStore.get(mainId);
+          const mainProxy = proxyStore.getRoot().getLinkedRecord('main');
           const connection = ConnectionHandler.getConnection(mainProxy, 'MovieList_movies');
           if(connection) {
             const edge = ConnectionHandler.createEdge(proxyStore, connection, newMovie);

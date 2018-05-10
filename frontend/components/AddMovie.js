@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import classes from './MovieDetails.css';
 import Input from './Input';
 import addMovieMutation from '../queries/AddMovie';
-import environment from '../Environment';
 import { Link } from 'react-router-dom';
 
 class MovieDetails extends Component {
@@ -25,13 +24,6 @@ class MovieDetails extends Component {
                     placeholder: 'Movie description'
                 },
                 value: ''
-            },
-            id: {
-                elementType: 'text',
-                elementConfig: {
-                    hidden: 'text',
-                },
-                value: props.id
             }
         };
     }
@@ -42,10 +34,9 @@ class MovieDetails extends Component {
     }
     handleSubmit = (event) => {
         event.preventDefault();
-        const id = this.state.id.value;
         const title = this.state.title.value;
         const description = this.state.description.value;
-        addMovieMutation(id, title, description, () => this.props.history.push('/'));
+        addMovieMutation(title, description, () => this.props.history.push('/'));
     }
     render() {
         return (

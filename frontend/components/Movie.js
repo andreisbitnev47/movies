@@ -3,9 +3,9 @@ import { createFragmentContainer, graphql } from 'react-relay';
 import DeleteMovieMutation from '../queries/DeleteMovie';
 import { Link } from 'react-router-dom';
 
-const Movie = ({movie, main}) => {
+const Movie = ({movie}) => {
     const handleDelete = () => {
-        DeleteMovieMutation(main.id, movie.id);
+        DeleteMovieMutation(movie.id);
     }
     return (
         <li className="list-group-item">
@@ -19,9 +19,6 @@ const Movie = ({movie, main}) => {
 }
 
 export default createFragmentContainer(Movie, graphql`
-    fragment Movie_main on Main {
-        id
-    }
     fragment Movie_movie on Movie {
         id
         title
