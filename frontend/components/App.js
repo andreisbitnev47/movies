@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import MovieList from './MovieList';
 import PropsRoute from './PropsRoute';
-import { Switch } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 import AddMovie from './AddMovie';
 import MovieDetails from './MovieDetails';
 
@@ -31,9 +31,11 @@ class App extends Component {
                 } else if (props) {
                     return (
                         <Switch>
-                            <PropsRoute exact path='/' component={MovieList} main={props.main} />
-                            <PropsRoute path='/addmovie' component={AddMovie} />
-                            <PropsRoute path='/:id' component={MovieDetails} />
+                            <Route exact path='/' render={routeProps => (
+                                <MovieList main={props.main} {...routeProps}/>
+                            )} />
+                            <Route path='/addmovie' component={AddMovie} />
+                            <Route path='/:id' component={MovieDetails} />
                         </Switch> 
                     )
                 }
